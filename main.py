@@ -559,7 +559,6 @@ def start():
             counter += 1
             end_time_round = datetime.now()
             print("found drop rounds: {}".format(found_counter))
-            # print("success rounds: {}".format(success_counter))
             print("total rounds: {}".format(counter))
             print("round time: {}\n".format(end_time_round - start_time_round))
             time.sleep(game_load_wait)
