@@ -242,10 +242,8 @@ def mfring():
 
 
 def mf(template):
-    loc_x = 0
-    loc_y = 0
-    found = False
-    check = False
+    loc_x, loc_y = 0, 0
+    found, check = False, False
     try_count = 0
     while (not check or loc_x != 0 or loc_y != 0) and try_count < 3:
         loc_x, loc_y = detect_template_bin(template,
@@ -261,8 +259,7 @@ def mf(template):
 
 
 def wait_to_load():
-    loc_x = 0
-    loc_y = 0
+    loc_x, loc_y = 0, 0
     while loc_x == 0 and loc_y == 0:
         time.sleep(0.1)
         loc_x, loc_y = detect_template_bin(difficult,
