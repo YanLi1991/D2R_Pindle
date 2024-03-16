@@ -10,6 +10,11 @@ import pytesseract
 hp_full = 1161
 mana_full = 586
 
+ice_armor_key = "A"
+ice_spike_key = "X"
+blizzard_key = "D"
+tele_key = "C"
+
 difficult = cv2.cvtColor(cv2.imread('elements/difficult.PNG'), cv2.COLOR_BGR2GRAY)
 portal = cv2.cvtColor(cv2.imread('elements/portal.PNG'), cv2.COLOR_BGR2GRAY)
 replay = cv2.cvtColor(cv2.imread('elements/replay.PNG'), cv2.COLOR_BGR2GRAY)
@@ -268,7 +273,7 @@ def wait_to_load():
 
 
 def to_pindle(cd=0.3):
-    mimic_keyboard_press("C", duration=0.2)
+    mimic_keyboard_press(tele_key, duration=0.2)
     time.sleep(0.1)
     loc_x, loc_y = detect_template_bin(not_pindle_yet3,
                                        take_screenshot(*convert_resolution(800, 0), *convert_resolution(700, 300)))
@@ -321,7 +326,7 @@ def in_temple():
 def fight():
     fight_rounds = 0
     while fight_rounds < 2 or (in_temple() and fight_rounds < 3):
-        mimic_keyboard_press("X", duration=0.1)
+        mimic_keyboard_press(ice_spike_key, duration=0.1)
         time.sleep(0.1)
         pyautogui.rightClick(*convert_resolution(1560, 200), duration=0.1)
         time.sleep(0.1)
@@ -329,7 +334,7 @@ def fight():
         time.sleep(0.1)
         pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
         time.sleep(0.1)
-        mimic_keyboard_press("D", duration=0.2)
+        mimic_keyboard_press(blizzard_key, duration=0.2)
         time.sleep(0.1)
         pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.3)
         time.sleep(0.3)
@@ -455,7 +460,7 @@ def heal_back(level="nightmare.PNG", wait=6):
 
 
 def ice_armor():
-    mimic_keyboard_press("A", duration=0.1)
+    mimic_keyboard_press(ice_armor_key, duration=0.1)
     time.sleep(0.1)
     pyautogui.rightClick(920, 500, duration=0.1)
     time.sleep(0.1)
