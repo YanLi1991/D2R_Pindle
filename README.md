@@ -33,3 +33,4 @@
 ![img_1.png](img_1.png)
 * Prerequisite 最后的命令行里运行 “python main.py” 开启bot (**命令行不要遮住上图的play button！！！**)
 * 无论何时，在menu界面开启bot
+* 调试时，可以用nm难度，一般不会死，把main.py的line 18改成False

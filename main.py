@@ -15,6 +15,8 @@ ice_spike_key = "X"
 blizzard_key = "D"
 tele_key = "C"
 
+hell = True
+
 difficult = cv2.cvtColor(cv2.imread('elements/difficult.PNG'), cv2.COLOR_BGR2GRAY)
 portal = cv2.cvtColor(cv2.imread('elements/portal.PNG'), cv2.COLOR_BGR2GRAY)
 replay = cv2.cvtColor(cv2.imread('elements/replay.PNG'), cv2.COLOR_BGR2GRAY)
@@ -525,7 +527,6 @@ def merc_back(level, wait=6):
 def start():
     start_time = datetime.now()
     game_load_wait = 1
-    hell = True
     level = nightmare
     if hell:
         level = hellgame
