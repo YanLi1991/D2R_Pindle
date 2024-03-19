@@ -7,8 +7,8 @@ import numpy as np
 import pyautogui
 import pytesseract
 
-hp_full = 1161
-mana_full = 586
+hp_full = 1197
+mana_full = 647
 
 ice_armor_key = "A"
 ice_spike_key = "X"
@@ -25,6 +25,7 @@ nightmare = cv2.cvtColor(cv2.imread('elements/nightmare.PNG'), cv2.COLOR_BGR2GRA
 hellgame = cv2.cvtColor(cv2.imread('elements/hellgame.PNG'), cv2.COLOR_BGR2GRAY)
 mf_diadem = cv2.cvtColor(cv2.imread('mf/diadem.png'), cv2.COLOR_BGR2GRAY)
 mf_amulet = cv2.cvtColor(cv2.imread('mf/amulet.png'), cv2.COLOR_BGR2GRAY)
+mf_jewel = cv2.cvtColor(cv2.imread('mf/jewel.PNG'), cv2.COLOR_BGR2GRAY)
 mf_shako = cv2.cvtColor(cv2.imread('mf/shako.PNG'), cv2.COLOR_BGR2GRAY)
 mf_smallcharm = cv2.cvtColor(cv2.imread('mf/smallcharm.PNG'), cv2.COLOR_BGR2GRAY)
 mf_grandcharm = cv2.cvtColor(cv2.imread('mf/grandcharm.PNG'), cv2.COLOR_BGR2GRAY)
@@ -85,7 +86,13 @@ def mimic_mouse_hold(x, y, duration=2.0):
 
 
 def take_screenshot(top_left_x=0, top_left_y=0, width=screen_width, height=screen_height):
-    screenshot = pyautogui.screenshot(region=(int(top_left_x), int(top_left_y), int(width), int(height)))
+    screenshot = None
+    while screenshot is None:
+        try:
+            screenshot = pyautogui.screenshot(region=(int(top_left_x), int(top_left_y), int(width), int(height)))
+        except OSError:
+            continue
+
     buffer = io.BytesIO()
     screenshot.save(buffer, format='PNG')
     return buffer
@@ -144,7 +151,7 @@ def select_game(wait_time=1):
     time.sleep(wait_time)
 
 
-def enter_game(template='nightmare.PNG', wait_time=1):
+def enter_game(template=nightmare, wait_time=1):
     loc_x, loc_y = 0, 0
     while loc_x == 0 and loc_y == 0:
         time.sleep(0.1)
@@ -197,6 +204,7 @@ def farm():
     found = mfrune()
     found = mf(mf_diadem) or found
     found = mf(mf_amulet) or found
+    found = mf(mf_jewel) or found
     found = mfring() or found
     found = mf(mf_shako) or found
     found = mf(mf_smallcharm) or found
@@ -327,19 +335,20 @@ def in_temple():
 
 def fight():
     fight_rounds = 0
-    while fight_rounds < 2 or (in_temple() and fight_rounds < 3):
+    # while fight_rounds < 2 or (in_temple() and fight_rounds < 3):
+    while fight_rounds < 3:
         mimic_keyboard_press(ice_spike_key, duration=0.1)
         time.sleep(0.1)
-        pyautogui.rightClick(*convert_resolution(1560, 200), duration=0.1)
-        time.sleep(0.1)
+        # pyautogui.rightClick(*convert_resolution(1560, 200), duration=0.1)
+        # time.sleep(0.1)
         pyautogui.rightClick(*convert_resolution(1570, 250), duration=0.1)
-        time.sleep(0.1)
+        time.sleep(0.2)
         pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
-        time.sleep(0.1)
-        mimic_keyboard_press(blizzard_key, duration=0.2)
-        time.sleep(0.1)
-        pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.3)
-        time.sleep(0.3)
+        time.sleep(0.2)
+        mimic_keyboard_press(blizzard_key, duration=0.1)
+        time.sleep(0.15)
+        pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.2)
+        time.sleep(0.4)
         fight_rounds += 1
 
     return False
@@ -452,7 +461,7 @@ def need_mana(threshold=0.8):
     return False
 
 
-def heal_back(level="nightmare.PNG", wait=6):
+def heal_back(level=nightmare, wait=6):
     heal_malah()
     leave()
     wait_to_leave()
