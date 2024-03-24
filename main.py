@@ -24,12 +24,18 @@ play_button = cv2.cvtColor(cv2.imread('elements/play_button.PNG'), cv2.COLOR_BGR
 nightmare = cv2.cvtColor(cv2.imread('elements/nightmare.PNG'), cv2.COLOR_BGR2GRAY)
 hellgame = cv2.cvtColor(cv2.imread('elements/hellgame.PNG'), cv2.COLOR_BGR2GRAY)
 mf_diadem = cv2.cvtColor(cv2.imread('mf/diadem.png'), cv2.COLOR_BGR2GRAY)
+mf_monarch = cv2.cvtColor(cv2.imread('mf/monarch.PNG'), cv2.COLOR_BGR2GRAY)
+mf_wand = cv2.cvtColor(cv2.imread('mf/wand.PNG'), cv2.COLOR_BGR2GRAY)
+mf_orb = cv2.cvtColor(cv2.imread('mf/orb.PNG'), cv2.COLOR_BGR2GRAY)
+mf_javelin = cv2.cvtColor(cv2.imread('mf/javelin.PNG'), cv2.COLOR_BGR2GRAY)
+mf_javelin2 = cv2.cvtColor(cv2.imread('mf/javelin2.PNG'), cv2.COLOR_BGR2GRAY)
 mf_amulet = cv2.cvtColor(cv2.imread('mf/amulet.png'), cv2.COLOR_BGR2GRAY)
 mf_jewel = cv2.cvtColor(cv2.imread('mf/jewel.PNG'), cv2.COLOR_BGR2GRAY)
 mf_shako = cv2.cvtColor(cv2.imread('mf/shako.PNG'), cv2.COLOR_BGR2GRAY)
 mf_smallcharm = cv2.cvtColor(cv2.imread('mf/smallcharm.PNG'), cv2.COLOR_BGR2GRAY)
 mf_grandcharm = cv2.cvtColor(cv2.imread('mf/grandcharm.PNG'), cv2.COLOR_BGR2GRAY)
 mf_flawless = cv2.cvtColor(cv2.imread('mf/flawless.PNG'), cv2.COLOR_BGR2GRAY)
+mf_boots = cv2.cvtColor(cv2.imread('mf/boots.PNG'), cv2.COLOR_BGR2GRAY)
 mf_perfect = cv2.cvtColor(cv2.imread('mf/perfect.PNG'), cv2.COLOR_BGR2GRAY)
 mf_rune_bow = cv2.cvtColor(cv2.imread('mf/rune_bow.png'), cv2.COLOR_BGR2GRAY)
 mf_rune_sword = cv2.cvtColor(cv2.imread('mf/rune_sword.png'), cv2.COLOR_BGR2GRAY)
@@ -79,7 +85,7 @@ def mimic_mouse_hold(x, y, duration=2.0):
     pyautogui.mouseDown()
 
     # Optional: Sleep for the specified duration to hold the click
-    time.sleep(duration)
+    pyautogui.sleep(duration)
 
     # Release the mouse button
     pyautogui.mouseUp()
@@ -104,14 +110,14 @@ def convert_resolution(width=0, height=0):
 
 def get_portal():
     mimic_mouse_hold(*convert_resolution(820, 700), 5.5)
-    time.sleep(1)
+    pyautogui.sleep(1)
     loc_x, loc_y = 0, 0
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         loc_x, loc_y = detect_template_bin(portal, take_screenshot())
     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(40, 60))])
     while loc_x != 0 and loc_y != 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         loc_x, loc_y = detect_template_bin(portal, take_screenshot())
 
 
@@ -120,22 +126,22 @@ def mimic_keyboard_press(key, duration=0.5):
     pyautogui.press(key)
 
     # Optional: Sleep for the specified duration
-    time.sleep(duration)
+    pyautogui.sleep(duration)
 
 
 def start_game(template=nightmare):
     wait_time = 0.5
     select_game()
     enter_game(template)
-    time.sleep(1)
+    pyautogui.sleep(1)
     loc_x, loc_y = detect_template_bin(replay,
                                        take_screenshot(*convert_resolution(560, 300), *convert_resolution(600, 600)))
     while loc_x != 0 and loc_y != 0:
-        time.sleep(10)
+        pyautogui.sleep(10)
         mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(620, 325))])
-        time.sleep(wait_time)
-        enter_game()
-        time.sleep(wait_time)
+        pyautogui.sleep(wait_time)
+        enter_game(template)
+        pyautogui.sleep(wait_time)
         loc_x, loc_y = detect_template_bin(replay, take_screenshot(*convert_resolution(560, 300),
                                                                    *convert_resolution(600, 600)))
 
@@ -143,23 +149,23 @@ def start_game(template=nightmare):
 def select_game(wait_time=1):
     loc_x, loc_y = 0, 0
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         loc_x, loc_y = detect_template_bin(play_button, take_screenshot(*convert_resolution(560, 900),
                                                                         *convert_resolution(600, 200)))
-    time.sleep(wait_time)
+    pyautogui.sleep(wait_time)
     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(640, 935))])
-    time.sleep(wait_time)
+    pyautogui.sleep(wait_time)
 
 
 def enter_game(template=nightmare, wait_time=1):
     loc_x, loc_y = 0, 0
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         loc_x, loc_y = detect_template_bin(template, take_screenshot(*convert_resolution(560, 300),
                                                                      *convert_resolution(600, 600)))
-    time.sleep(wait_time)
+    pyautogui.sleep(wait_time)
     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(620, 325))])
-    time.sleep(wait_time)
+    pyautogui.sleep(wait_time)
 
 
 def detect_template_bin(template, screenshot, threshold=0.85):
@@ -196,30 +202,39 @@ def detect_template(template_path, image_path, output_image_path, threshold=0.85
     return max_loc
 
 
+def mf_screenshot():
+    return take_screenshot(*convert_resolution(500, 0), *convert_resolution(1500, 600))
+
+
 def farm():
     pyautogui.keyDown('alt')
     if not merc_died() and not need_heal(0.9):
-        time.sleep(1.5)
-    time.sleep(0.1)
-    found = mfrune()
-    found = mf(mf_diadem) or found
-    found = mf(mf_amulet) or found
-    found = mf(mf_jewel) or found
-    found = mfring() or found
-    found = mf(mf_shako) or found
-    found = mf(mf_smallcharm) or found
-    found = mf(mf_grandcharm) or found
-    found = mf(mf_flawless) or found
-    found = mf(mf_perfect) or found
+        pyautogui.sleep(1.5)
+    pyautogui.sleep(0.1)
+    screenshot = mf_screenshot()
+    found = mf(mf_jewel, screenshot)
+    found = mf(mf_flawless, mf_screenshot() if found else screenshot) or found
+    found = mfrune(mf_screenshot() if found else screenshot) or found
+    found = mf(mf_amulet, mf_screenshot() if found else screenshot) or found
+    found = mfring(mf_screenshot() if found else screenshot) or found
+    found = mf(mf_smallcharm, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_grandcharm, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_monarch, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_wand, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_boots, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_orb, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_javelin, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_javelin2, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_diadem, mf_screenshot() if found else screenshot) or found
     pyautogui.keyUp('alt')
     return found
 
 
-def mfrune():
+def mfrune(screenshot):
     loc_x, loc_y, try_count = 0, 0, 0
     found, check = False, False
     while (not check or loc_x != 0 or loc_y != 0) and try_count < 3:
-        buffer = take_screenshot(*convert_resolution(500, 0), *convert_resolution(1500, 600))
+        buffer = screenshot if not check else take_screenshot(*convert_resolution(500, 0), *convert_resolution(1500, 600))
         loc_x2, loc_y2 = detect_template_bin(mf_rune_bow, buffer)
         loc_x3, loc_y3 = detect_template_bin(mf_rune_sword, buffer)
         loc_x4, loc_y4 = detect_template_bin(mf_rune_scepter, buffer)
@@ -238,11 +253,12 @@ def mfrune():
     return found
 
 
-def mfring():
+def mfring(screenshot):
     loc_x, loc_y, try_count = 0, 0, 0
     found, check = False, False
     while (not check or loc_x != 0 or loc_y != 0) and try_count < 3:
-        buffer = take_screenshot(*convert_resolution(500, 0), *convert_resolution(1500, 600))
+        buffer = screenshot if not check else take_screenshot(*convert_resolution(500, 0),
+                                                              *convert_resolution(1500, 600))
         loc_x2, loc_y2 = detect_template_bin(mf_ring_mail, buffer)
         if loc_x2 == 0 and loc_y2 == 0:
             loc_x, loc_y = detect_template_bin(mf_ring, buffer)
@@ -256,13 +272,13 @@ def mfring():
     return found
 
 
-def mf(template):
+def mf(template, screenshot):
     loc_x, loc_y = 0, 0
     found, check = False, False
     try_count = 0
     while (not check or loc_x != 0 or loc_y != 0) and try_count < 3:
         loc_x, loc_y = detect_template_bin(template,
-                                           take_screenshot(*convert_resolution(500, 0), *convert_resolution(1500, 600)))
+                                           screenshot if not check else take_screenshot(*convert_resolution(500, 0), *convert_resolution(1500, 600)))
         if loc_x != 0 or loc_y != 0:
             found = True
             mimic_mouse_hold(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(510, 5))])
@@ -276,42 +292,22 @@ def mf(template):
 def wait_to_load():
     loc_x, loc_y = 0, 0
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         loc_x, loc_y = detect_template_bin(difficult,
                                            take_screenshot(*convert_resolution(1700, 0), *convert_resolution(220, 60)))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
 
 
 def to_pindle(cd=0.3):
     mimic_keyboard_press(tele_key, duration=0.2)
-    time.sleep(0.1)
-    loc_x, loc_y = detect_template_bin(not_pindle_yet3,
-                                       take_screenshot(*convert_resolution(800, 0), *convert_resolution(700, 300)))
-    tele_count = 0
-    while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
-        loc_x, loc_y = detect_template_bin(not_pindle_yet3,
-                                           take_screenshot(*convert_resolution(800, 0), *convert_resolution(700, 300)))
+    pyautogui.sleep(0.1)
+    pyautogui.rightClick(*convert_resolution(1480, 100), duration=0.2)
+    pyautogui.sleep(0.3 if cd < 0.3 else cd)
+    pyautogui.rightClick(*convert_resolution(1480, 130), duration=0.2)
+    pyautogui.sleep(0.3 if cd < 0.3 else cd)
+    pyautogui.rightClick(*convert_resolution(1485, 105), duration=0.2)
+    pyautogui.sleep(cd)
 
-    while loc_x != 0 or loc_y != 0:
-        pyautogui.rightClick(*convert_resolution(1480, 100), duration=0.2)
-        time.sleep(cd)
-        tele_count += 1
-        loc_x, loc_y = detect_template_bin(not_pindle_yet3,
-                                           take_screenshot(*convert_resolution(800, 0), *convert_resolution(700, 300)))
-
-    loc_x, loc_y = detect_template_bin(not_pindle_yet2,
-                                       take_screenshot(*convert_resolution(800, 0), *convert_resolution(700, 300)))
-    while loc_x != 0 or loc_y != 0:
-        pyautogui.rightClick(*convert_resolution(1480, 130), duration=0.2)
-        time.sleep(cd)
-        tele_count += 1
-        loc_x, loc_y = detect_template_bin(not_pindle_yet2,
-                                           take_screenshot(*convert_resolution(800, 0), *convert_resolution(700, 300)))
-
-    if tele_count < 3:
-        pyautogui.rightClick(*convert_resolution(1485, 105), duration=0.3)
-        time.sleep(cd)
 
 
 def ice_gun(cd=0.3):
@@ -320,9 +316,9 @@ def ice_gun(cd=0.3):
         pyautogui.rightClick(screen_width // 2, screen_height // 2, duration=0.1)
         while count < 8:
             pyautogui.leftClick(*convert_resolution(1450, 200), duration=0.1)
-            time.sleep(cd)
+            pyautogui.sleep(cd)
             pyautogui.leftClick(*convert_resolution(1500, 250), duration=0.1)
-            time.sleep(cd)
+            pyautogui.sleep(cd)
             count += 1
     print("shot done")
 
@@ -335,20 +331,17 @@ def in_temple():
 
 def fight():
     fight_rounds = 0
-    # while fight_rounds < 2 or (in_temple() and fight_rounds < 3):
     while fight_rounds < 3:
         mimic_keyboard_press(ice_spike_key, duration=0.1)
-        time.sleep(0.1)
-        # pyautogui.rightClick(*convert_resolution(1560, 200), duration=0.1)
-        # time.sleep(0.1)
-        pyautogui.rightClick(*convert_resolution(1570, 250), duration=0.1)
-        time.sleep(0.2)
+        pyautogui.sleep(0.1)
+        pyautogui.rightClick(*convert_resolution(1590, 250), duration=0.1)
+        pyautogui.sleep(0.2)
         pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
-        time.sleep(0.2)
+        pyautogui.sleep(0.2)
         mimic_keyboard_press(blizzard_key, duration=0.1)
-        time.sleep(0.15)
+        pyautogui.sleep(0.15)
         pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.2)
-        time.sleep(0.4)
+        pyautogui.sleep(0.3)
         fight_rounds += 1
 
     return False
@@ -356,7 +349,7 @@ def fight():
 
 def leave():
     pyautogui.press('esc')
-    time.sleep(0.1)
+    pyautogui.sleep(0.1)
     mimic_mouse_click(*convert_resolution(880, 470), 0.1)
 
 
@@ -364,47 +357,48 @@ def wait_to_leave():
     loc_x, loc_y = detect_template_bin(play_button,
                                        take_screenshot(*convert_resolution(560, 900), *convert_resolution(600, 200)))
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         loc_x, loc_y = detect_template_bin(play_button, take_screenshot(*convert_resolution(560, 900),
                                                                         *convert_resolution(600, 200)))
 
 
-def put_to_chest():
+def put_to_chest(count):
     mimic_mouse_hold(*convert_resolution(800, 700), 2)
-    time.sleep(1)
+    pyautogui.sleep(1)
     mimic_mouse_click(*convert_resolution(1500, 570))
-    time.sleep(1)
-    mimic_mouse_click(*convert_resolution(550, 200))
-    time.sleep(0.1)
+    pyautogui.sleep(1)
+    chest = convert_resolution(550, 200) if count % 2 == 0 else convert_resolution(500, 200)
+    mimic_mouse_click(*chest)
+    pyautogui.sleep(0.1)
     with pyautogui.hold('ctrl'):
         mimic_mouse_click(*convert_resolution(1740, 720))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         mimic_mouse_click(*convert_resolution(1740, 675))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         mimic_mouse_click(*convert_resolution(1740, 630))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         mimic_mouse_click(*convert_resolution(1740, 585))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         mimic_mouse_click(*convert_resolution(1700, 720))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         mimic_mouse_click(*convert_resolution(1700, 675))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         mimic_mouse_click(*convert_resolution(1700, 630))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         mimic_mouse_click(*convert_resolution(1700, 585))
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
     pyautogui.press('esc')
     mimic_mouse_click(*convert_resolution(900, 550))
-    time.sleep(0.1)
+    pyautogui.sleep(0.1)
 
 
 def heal_malah():
     mimic_mouse_click(*convert_resolution(200, 400))
-    time.sleep(1.5)
+    pyautogui.sleep(1.5)
     loc_x = 0
     loc_y = 0
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         buffer = take_screenshot(*convert_resolution(560, 100), *convert_resolution(600, 600))
         loc_x, loc_y = detect_template_bin(malah2, buffer, 0.8)
         if loc_x == 0 and loc_y == 0:
@@ -416,7 +410,7 @@ def heal_malah():
         if loc_x == 0 and loc_y == 0:
             loc_x, loc_y = detect_template_bin(malah5, buffer, 0.8)
     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(570, 130))])
-    time.sleep(1.5)
+    pyautogui.sleep(1.5)
     pyautogui.press('esc')
 
 
@@ -465,26 +459,26 @@ def heal_back(level=nightmare, wait=6):
     heal_malah()
     leave()
     wait_to_leave()
-    time.sleep(wait)
+    pyautogui.sleep(wait)
     start_game(level)
     wait_to_load()
 
 
 def ice_armor():
     mimic_keyboard_press(ice_armor_key, duration=0.1)
-    time.sleep(0.1)
+    pyautogui.sleep(0.1)
     pyautogui.rightClick(920, 500, duration=0.1)
-    time.sleep(0.1)
+    pyautogui.sleep(0.1)
 
 
 def revive_merc():
     mimic_mouse_click(*convert_resolution(0, 400))
-    time.sleep(1.5)
+    pyautogui.sleep(1.5)
     mimic_mouse_hold(*convert_resolution(700, 700), 2.5)
-    time.sleep(1)
+    pyautogui.sleep(1)
     loc_x, loc_y = 0, 0
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         buffer = take_screenshot(*convert_resolution(260, 0), *convert_resolution(800, 800))
         loc_x, loc_y = detect_template_bin(qualx1, buffer, 0.6)
         if loc_x == 0 and loc_y == 0:
@@ -502,18 +496,18 @@ def revive_merc():
         if loc_x == 0 and loc_y == 0:
             loc_x, loc_y = detect_template_bin(qualx8, buffer, 0.6)
     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(280, 30))])
-    time.sleep(1.5)
+    pyautogui.sleep(1.5)
     loc_x, loc_y = detect_template_bin(resurrect,
                                        take_screenshot(*convert_resolution(500, 100), *convert_resolution(600, 600)),
                                        0.8)
     while loc_x == 0 and loc_y == 0:
-        time.sleep(0.1)
+        pyautogui.sleep(0.1)
         loc_x, loc_y = detect_template_bin(resurrect, take_screenshot(*convert_resolution(500, 100),
                                                                       *convert_resolution(600, 600)), 0.8)
     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(530, 105))])
-    time.sleep(1.5)
+    pyautogui.sleep(1.5)
     pyautogui.press('esc')
-    time.sleep(0.5)
+    pyautogui.sleep(0.5)
 
 
 def merc_died():
@@ -528,7 +522,7 @@ def merc_back(level, wait=6):
     revive_merc()
     leave()
     wait_to_leave()
-    time.sleep(wait)
+    pyautogui.sleep(wait)
     start_game(level)
     wait_to_load()
 
@@ -549,10 +543,10 @@ def start():
             if found:
                 start_game(level)
                 wait_to_load()
-                put_to_chest()
+                put_to_chest(found_counter)
                 leave()
                 wait_to_leave()
-                time.sleep(game_load_wait)
+                pyautogui.sleep(game_load_wait)
             start_game(level)
             wait_to_load()
             if merc_died():
@@ -563,7 +557,7 @@ def start():
             get_portal()
             wait_to_load()
             to_pindle(0.2)
-            time.sleep(0.5)
+            pyautogui.sleep(0.5)
             fight()
             found = farm()
             if found:
@@ -576,7 +570,7 @@ def start():
             print("found drop rounds: {}".format(found_counter))
             print("total rounds: {}".format(counter))
             print("round time: {}\n".format(end_time_round - start_time_round))
-            time.sleep(game_load_wait)
+            pyautogui.sleep(game_load_wait)
     except KeyboardInterrupt:
         end_time = datetime.now()
         print('Duration: {}'.format(end_time - start_time))
