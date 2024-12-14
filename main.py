@@ -1,4 +1,8 @@
 import io
+import multiprocessing
+import os
+import sys
+import threading
 import time
 from datetime import datetime
 
@@ -7,8 +11,8 @@ import numpy as np
 import pyautogui
 import pytesseract
 
-hp_full = 892
-mana_full = 470
+hp_full = 945
+mana_full = 505
 
 ice_armor_key = "A"
 ice_spike_key = "X"
@@ -16,13 +20,20 @@ blizzard_key = "D"
 tele_key = "C"
 
 hell = True
+counter = 0
+restart_event = multiprocessing.Event()
 
 difficult = cv2.cvtColor(cv2.imread('elements/difficult.PNG'), cv2.COLOR_BGR2GRAY)
 portal = cv2.cvtColor(cv2.imread('elements/portal.PNG'), cv2.COLOR_BGR2GRAY)
 replay = cv2.cvtColor(cv2.imread('elements/replay.PNG'), cv2.COLOR_BGR2GRAY)
+battlenet_play = cv2.cvtColor(cv2.imread('elements/play.PNG'), cv2.COLOR_BGR2GRAY)
 play_button = cv2.cvtColor(cv2.imread('elements/play_button.PNG'), cv2.COLOR_BGR2GRAY)
 nightmare = cv2.cvtColor(cv2.imread('elements/nightmare.PNG'), cv2.COLOR_BGR2GRAY)
 hellgame = cv2.cvtColor(cv2.imread('elements/hellgame.PNG'), cv2.COLOR_BGR2GRAY)
+unidentified = cv2.cvtColor(cv2.imread('elements/unidentified.PNG'), cv2.COLOR_BGR2GRAY)
+empty = cv2.cvtColor(cv2.imread('elements/empty.PNG'), cv2.COLOR_BGR2GRAY)
+stash = cv2.cvtColor(cv2.imread('elements/chest.PNG'), cv2.COLOR_BGR2GRAY)
+
 mf_diadem = cv2.cvtColor(cv2.imread('mf/diadem.png'), cv2.COLOR_BGR2GRAY)
 mf_diadem_unique = cv2.cvtColor(cv2.imread('mf/diadem.png'), cv2.COLOR_BGR2BGRA)
 mf_monarch = cv2.cvtColor(cv2.imread('mf/monarch.PNG'), cv2.COLOR_BGR2GRAY)
@@ -38,14 +49,14 @@ mf_amulet = cv2.cvtColor(cv2.imread('mf/amulet.png'), cv2.COLOR_BGR2GRAY)
 mf_amulet_unique = cv2.cvtColor(cv2.imread('mf/amulet.png'), cv2.COLOR_BGR2BGRA)
 mf_jewel = cv2.cvtColor(cv2.imread('mf/jewel.PNG'), cv2.COLOR_BGR2GRAY)
 mf_jewel_unique = cv2.cvtColor(cv2.imread('mf/jewel.PNG'), cv2.COLOR_BGR2BGRA)
-mf_shako = cv2.cvtColor(cv2.imread('mf/shako.PNG'), cv2.COLOR_BGR2GRAY)
+mf_shako = cv2.cvtColor(cv2.imread('mf/shako.PNG'), cv2.COLOR_BGR2BGRA)
 mf_smallcharm = cv2.cvtColor(cv2.imread('mf/smallcharm.PNG'), cv2.COLOR_BGR2GRAY)
 mf_grandcharm = cv2.cvtColor(cv2.imread('mf/grandcharm.PNG'), cv2.COLOR_BGR2GRAY)
 mf_flawless = cv2.cvtColor(cv2.imread('mf/flawless.PNG'), cv2.COLOR_BGR2GRAY)
 mf_flawless_ame = cv2.cvtColor(cv2.imread('mf/flawless_ame.PNG'), cv2.COLOR_BGR2GRAY)
 mf_flawless_topaz = cv2.cvtColor(cv2.imread('mf/flawless_topaz.PNG'), cv2.COLOR_BGR2GRAY)
 mf_vampire = cv2.cvtColor(cv2.imread('mf/vampire.PNG'), cv2.COLOR_BGR2BGRA)
-#mf_flawless = cv2.cvtColor(cv2.imread('mf/flaw.PNG'), cv2.COLOR_BGR2GRAY)
+# mf_flawless = cv2.cvtColor(cv2.imread('mf/flaw.PNG'), cv2.COLOR_BGR2GRAY)
 mf_boots = cv2.cvtColor(cv2.imread('mf/boots.PNG'), cv2.COLOR_BGR2GRAY)
 mf_boots_unique = cv2.cvtColor(cv2.imread('mf/nboots.PNG'), cv2.COLOR_BGR2BGRA)
 mf_greaves_unique = cv2.cvtColor(cv2.imread('mf/greaves.PNG'), cv2.COLOR_BGR2BGRA)
@@ -242,7 +253,7 @@ def farm():
         pyautogui.sleep(1.5)
     pyautogui.sleep(0.1)
     screenshot = mf_screenshot()
-    #found = mf(mf_jewel, screenshot)
+    # found = mf(mf_jewel, screenshot)
     found = mf(mf_flawless_ame, screenshot)
     # found = mf(mf_flawless_topaz, mf_screenshot() if found else screenshot) or found
     found = mf(mf_perfect_ame, mf_screenshot() if found else screenshot) or found
@@ -252,20 +263,21 @@ def farm():
     found = mf(mf_smallcharm, mf_screenshot() if found else screenshot) or found
     found = mf(mf_grandcharm, mf_screenshot() if found else screenshot) or found
     found = mf(mf_monarch_magic, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
-    found = mf(mf_wand_unique, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     found = mf(mf_amulet_unique, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     found = mf(mf_vampire, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     found = mf(mf_glove, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     found = mf(mf_belt, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     found = mf(mf_boots_unique, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     found = mf(mf_greaves_unique, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
-    # found = mf(mf_mitts_rare, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
-    # found = mf(mf_gloves_rare, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
-    #found = mf(mf_gauntlets_rare, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
-    #found = mf(mf_orb_magic, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
-    #found = mf(mf_javelin, mf_screenshot() if found else screenshot) or found
+    found = mf(mf_mitts_rare, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
+    found = mf(mf_gloves_rare, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
+    found = mf(mf_gauntlets_rare, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
+    found = mf(mf_orb_magic, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
+    found = mf(mf_javelin, mf_screenshot() if found else screenshot) or found
     found = mf(mf_vortex, mf_screenshot() if found else screenshot) or found
-    #found = mf(mf_javelin2_magic, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
+    found = mf(mf_javelin2_magic, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
+    found = mf(mf_shako, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
+    found = mf(mf_wand_unique, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     found = mf(mf_diadem_unique, mf_screenshot() if found else screenshot, color_format=cv2.COLOR_BGR2BGRA) or found
     pyautogui.keyUp('alt')
     return found
@@ -375,21 +387,30 @@ def in_temple():
 
 def fight():
     fight_rounds = 0
-    while fight_rounds < 3:
+    while fight_rounds < 2:
         mimic_keyboard_press(ice_spike_key, duration=0.1)
         pyautogui.sleep(0.1)
         pyautogui.rightClick(*convert_resolution(1590, 250), duration=0.1)
         pyautogui.sleep(0.2)
         pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
         pyautogui.sleep(0.2)
-        mimic_keyboard_press(blizzard_key, duration=0.05)
-        mimic_keyboard_press(blizzard_key, duration=0.05)
-        mimic_keyboard_press(blizzard_key, duration=0.05)
-        mimic_keyboard_press(blizzard_key, duration=0.05)
+        pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
         pyautogui.sleep(0.2)
-        pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.2)
+        pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
+        pyautogui.sleep(0.2)
+        mimic_keyboard_press(blizzard_key, duration=0.1)
+        pyautogui.sleep(0.1)
+        pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.1)
+        pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.1)
         pyautogui.sleep(0.4)
         fight_rounds += 1
+    mimic_keyboard_press(ice_spike_key, duration=0.1)
+    pyautogui.sleep(0.1)
+    pyautogui.rightClick(*convert_resolution(1590, 250), duration=0.1)
+    pyautogui.sleep(0.2)
+    pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
+    pyautogui.sleep(0.2)
+    pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
 
     return False
 
@@ -409,10 +430,110 @@ def wait_to_leave():
                                                                         *convert_resolution(600, 200)))
 
 
+def check_then_put(x, y, duration_in=0.2):
+    pyautogui.moveTo(x, y, duration_in)
+    pyautogui.sleep(0.1)
+    loc_x, loc_y = detect_template_bin(unidentified,
+                                       take_screenshot(*convert_resolution(1280, 300), *convert_resolution(640, 720)),
+                                       cv2.COLOR_BGR2GRAY)
+    loc_x2, loc_y2 = detect_template_bin(mf_rune,
+                                         take_screenshot(*convert_resolution(1280, 300), *convert_resolution(640, 720)),
+                                         cv2.COLOR_BGR2GRAY)
+    loc_x3, loc_y3 = detect_template_bin(mf_flawless,
+                                         take_screenshot(*convert_resolution(1280, 300), *convert_resolution(640, 720)),
+                                         cv2.COLOR_BGR2GRAY)
+    if (loc_x != 0 and loc_y != 0) or (loc_x2 != 0 and loc_y2 != 0) or (loc_x3 != 0 and loc_y3 != 0):
+        with pyautogui.hold('ctrl'):
+            mimic_mouse_click(*convert_resolution(x, y))
+            pyautogui.sleep(0.1)
+
+
+def dump_gear(x, y, duration_in=0.2):
+    pyautogui.moveTo(x, y, duration_in)
+    pyautogui.sleep(0.1)
+    loc_x, loc_y = detect_template_bin(unidentified,
+                                       take_screenshot(*convert_resolution(1280, 300), *convert_resolution(640, 720)),
+                                       cv2.COLOR_BGR2GRAY)
+    loc_x2, loc_y2 = detect_template_bin(mf_rune,
+                                         take_screenshot(*convert_resolution(1280, 300), *convert_resolution(640, 720)),
+                                         cv2.COLOR_BGR2GRAY)
+    loc_x3, loc_y3 = detect_template_bin(mf_flawless,
+                                         take_screenshot(*convert_resolution(1280, 300), *convert_resolution(640, 720)),
+                                         cv2.COLOR_BGR2GRAY)
+    if loc_x == 0 and loc_y == 0 and loc_x2 == 0 and loc_y2 == 0 and loc_x3 == 0 and loc_y3 == 0:
+        with pyautogui.hold('ctrl'):
+            mimic_mouse_click(*convert_resolution(x, y))
+            pyautogui.sleep(0.1)
+
+
+def put_into_chest():
+    if not_empty():
+        check_then_put(1740, 720)
+    if not_empty():
+        check_then_put(1740, 675)
+    if not_empty():
+        check_then_put(1740, 630)
+    if not_empty():
+        check_then_put(1740, 585)
+    if not_empty():
+        check_then_put(1700, 720)
+    if not_empty():
+        check_then_put(1700, 675)
+    if not_empty():
+        check_then_put(1700, 630)
+    if not_empty():
+        check_then_put(1700, 585)
+    pyautogui.press('esc')
+    mimic_mouse_click(*convert_resolution(900, 550))
+
+
+def not_empty():
+    loc_x, loc_y = detect_template_bin(empty,
+                                       take_screenshot(*convert_resolution(1280, 300), *convert_resolution(640, 720)),
+                                       cv2.COLOR_BGR2GRAY)
+    return loc_x == 0 and loc_y == 0
+
+
+def dump_garbage():
+    mimic_keyboard_press("I", duration=0.1)
+    if not_empty():
+        dump_gear(1740, 720)
+    if not_empty():
+        dump_gear(1740, 675)
+    if not_empty():
+        dump_gear(1740, 630)
+    if not_empty():
+        dump_gear(1740, 585)
+    if not_empty():
+        dump_gear(1700, 720)
+    if not_empty():
+        dump_gear(1700, 675)
+    if not_empty():
+        dump_gear(1700, 630)
+    if not_empty():
+        dump_gear(1700, 585)
+    pyautogui.press('esc')
+
+
+def find_stash():
+    stash_counter, loc_x, loc_y = 0, 0, 0
+    while stash_counter < 3:
+        loc_x, loc_y = detect_template_bin(stash,
+                                           take_screenshot(*convert_resolution(1280, 300),
+                                                           *convert_resolution(640, 300)),
+                                           cv2.COLOR_BGR2GRAY)
+        if loc_x != 0 and loc_y != 0:
+            return 1280 + loc_x, 300 + loc_y
+        stash_counter += 1
+    return 1500, 570
+
+
 def put_to_chest(count):
     mimic_mouse_hold(*convert_resolution(800, 700), 2)
     pyautogui.sleep(1)
-    mimic_mouse_click(*convert_resolution(1500, 570))
+
+    mimic_mouse_click(*convert_resolution(*find_stash()))
+
     pyautogui.sleep(1)
     chest = convert_resolution(550, 200)
     if count % 3 == 1:
@@ -421,25 +542,27 @@ def put_to_chest(count):
         chest = convert_resolution(500, 200)
     mimic_mouse_click(*chest)
     pyautogui.sleep(0.1)
-    with pyautogui.hold('ctrl'):
-        mimic_mouse_click(*convert_resolution(1740, 720))
-        pyautogui.sleep(0.1)
-        mimic_mouse_click(*convert_resolution(1740, 675))
-        pyautogui.sleep(0.1)
-        mimic_mouse_click(*convert_resolution(1740, 630))
-        pyautogui.sleep(0.1)
-        mimic_mouse_click(*convert_resolution(1740, 585))
-        pyautogui.sleep(0.1)
-        mimic_mouse_click(*convert_resolution(1700, 720))
-        pyautogui.sleep(0.1)
-        mimic_mouse_click(*convert_resolution(1700, 675))
-        pyautogui.sleep(0.1)
-        mimic_mouse_click(*convert_resolution(1700, 630))
-        pyautogui.sleep(0.1)
-        mimic_mouse_click(*convert_resolution(1700, 585))
-        pyautogui.sleep(0.1)
-    pyautogui.press('esc')
-    mimic_mouse_click(*convert_resolution(900, 550))
+    put_into_chest()
+    dump_garbage()
+    # with pyautogui.hold('ctrl'):
+    #     mimic_mouse_click(*convert_resolution(1740, 720))
+    #     pyautogui.sleep(0.1)
+    #     mimic_mouse_click(*convert_resolution(1740, 675))
+    #     pyautogui.sleep(0.1)
+    #     mimic_mouse_click(*convert_resolution(1740, 630))
+    #     pyautogui.sleep(0.1)
+    #     mimic_mouse_click(*convert_resolution(1740, 585))
+    #     pyautogui.sleep(0.1)
+    #     mimic_mouse_click(*convert_resolution(1700, 720))
+    #     pyautogui.sleep(0.1)
+    #     mimic_mouse_click(*convert_resolution(1700, 675))
+    #     pyautogui.sleep(0.1)
+    #     mimic_mouse_click(*convert_resolution(1700, 630))
+    #     pyautogui.sleep(0.1)
+    #     mimic_mouse_click(*convert_resolution(1700, 585))
+    #     pyautogui.sleep(0.1)
+    # pyautogui.press('esc')
+    mimic_mouse_click(*convert_resolution(900, 350))
     pyautogui.sleep(0.1)
 
 
@@ -460,7 +583,7 @@ def heal_malah():
             loc_x, loc_y = detect_template_bin(malah4, buffer, threshold=0.8)
         if loc_x == 0 and loc_y == 0:
             loc_x, loc_y = detect_template_bin(malah5, buffer, threshold=0.8)
-        if not (need_heal() or need_mana(0.35)):
+        if not (need_heal() or need_mana(0.25)):
             return
     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(570, 130))])
     pyautogui.sleep(1.5)
@@ -469,7 +592,7 @@ def heal_malah():
 
 def need_heal(threshold=0.8):
     count = 0
-    while count < 2:
+    while count < 4:
         buffer = take_screenshot(*convert_resolution(430, 863), *convert_resolution(55, 30))
         # Convert the image to grayscale
         gray_image = cv2.cvtColor(cv2.imdecode(np.frombuffer(buffer.getvalue(), np.uint8), cv2.IMREAD_COLOR),
@@ -492,7 +615,8 @@ def need_heal(threshold=0.8):
 
 def need_mana(threshold=0.8):
     count = 0
-    while count < 2:
+    prev_mana = 0
+    while count < 4:
         buffer = take_screenshot(*convert_resolution(1430, 863), *convert_resolution(55, 30))
         # Convert the image to grayscale
 
@@ -586,56 +710,128 @@ def merc_back(level, wait=6):
     wait_to_load()
 
 
-def start():
-    start_time = datetime.now()
-    game_load_wait = 1
-    level = nightmare
-    if hell:
-        level = hellgame
-    try:
-        counter = 0
-        found_counter = 0
-        success_counter = 0
-        found = False
-        while True:
-            start_time_round = datetime.now()
-            if found:
+def start(update_time):
+    while not restart_event.is_set():
+        global counter
+        start_time = datetime.now()
+        game_load_wait = 1
+        level = nightmare
+        if hell:
+            level = hellgame
+        try:
+
+            found_counter = 0
+            success_counter = 0
+            found = False
+            while True:
+                start_time_round = datetime.now()
+                if found:
+                    start_game(level)
+                    wait_to_load()
+                    put_to_chest(found_counter)
+                    leave()
+                    wait_to_leave()
+                    pyautogui.sleep(game_load_wait)
                 start_game(level)
                 wait_to_load()
-                put_to_chest(found_counter)
+                if merc_died():
+                    merc_back(level, game_load_wait)
+                if need_heal() or need_mana(0.25):
+                    heal_back(level, game_load_wait)
+                ice_armor()
+                get_portal()
+                wait_to_load()
+                to_pindle(0.2)
+                pyautogui.sleep(0.5)
+                fight()
+                found = farm()
+                if found:
+                    found_counter += 1
+                success_counter += 1
                 leave()
                 wait_to_leave()
+                with update_time.get_lock():
+                    counter += 1
+                    update_time.value = time.time()
+                end_time_round = datetime.now()
+                print("found drop rounds: {}".format(found_counter))
+                print("total rounds: {}".format(counter))
+                print("round time: {}\n".format(end_time_round - start_time_round))
                 pyautogui.sleep(game_load_wait)
-            start_game(level)
-            wait_to_load()
-            if merc_died():
-                merc_back(level, game_load_wait)
-            # if need_mana(0.35) or need_heal():
-            if need_heal() or need_mana(0.35):
-                heal_back(level, game_load_wait)
-            ice_armor()
-            get_portal()
-            wait_to_load()
-            to_pindle(0.2)
-            pyautogui.sleep(0.5)
-            fight()
-            found = farm()
-            if found:
-                found_counter += 1
-            success_counter += 1
-            leave()
-            wait_to_leave()
-            counter += 1
-            end_time_round = datetime.now()
-            print("found drop rounds: {}".format(found_counter))
-            print("total rounds: {}".format(counter))
-            print("round time: {}\n".format(end_time_round - start_time_round))
-            pyautogui.sleep(game_load_wait)
-    except KeyboardInterrupt:
-        end_time = datetime.now()
-        print('Duration: {}'.format(end_time - start_time))
-        print('Loop interrupted')
+        except KeyboardInterrupt:
+            end_time = datetime.now()
+            print('Duration: {}'.format(end_time - start_time))
+            print('Loop interrupted')
+
+
+def check_rounds(update_time):
+    start_diablo = False
+    while True:
+        with update_time.get_lock():
+            time_since_update = time.time() - update_time.value
+
+        # if time_since_update > 150:  # 2 minutes 30 seconds
+        if time_since_update > 300:
+            print("Value hasn't updated for 5 mins. Restarting game...")
+            restart_event.set()  # Signal the updater thread to stop
+            time.sleep(5)  # Allow the updater thread to exit
+
+            # Restart the updater thread
+            restart_event.clear()
+            new_updater_thread = threading.Thread(target=start)
+            new_updater_thread.start()
+            start_diablo = True
+
+        if start_diablo:
+            restart_game_from_battlenet()
+            with update_time.get_lock():
+                update_time.value = time.time()
+            start_diablo = False
+
+        time.sleep(5)  # Simulate periodic checking
+
+
+def restart_game_from_battlenet():
+    pyautogui.hotkey('alt', 'f4')
+    pyautogui.sleep(5)
+    click_play()
+    pyautogui.sleep(10)
+    mimic_mouse_click(500, 500)
+    pyautogui.sleep(10)
+    mimic_mouse_click(500, 500)
+    pyautogui.sleep(10)
+    mimic_mouse_click(500, 500)
+
+
+def click_play():
+    pyautogui.sleep(1)
+    retry, loc_x, loc_y = 0, 0, 0
+    while loc_x == 0 and loc_y == 0 and retry <= 10:
+        pyautogui.sleep(0.1)
+        loc_x, loc_y = detect_template_bin(battlenet_play, take_screenshot())
+        retry += 1
+    mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(30, 20))])
 
 
 if __name__ == "__main__":
-    start()
+    # start()
+    last_update_time = multiprocessing.Value('d', time.time())
+
+    # Create initial updater thread
+    updater_thread = multiprocessing.Process(target=start, args=(last_update_time,))
+    reader_thread = multiprocessing.Process(target=check_rounds, args=(last_update_time,))
+
+    # Start threads
+    updater_thread.start()
+    reader_thread.start()
+
+    try:
+        # Keep the main thread alive to monitor the threads
+        while True:
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("\nCtrl+C detected! Stopping threads...")
+        updater_thread.terminate()
+        reader_thread.terminate()
+
+    print("All threads stopped. Program exiting.")
