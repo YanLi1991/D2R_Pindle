@@ -4,6 +4,11 @@ import os
 import sys
 import threading
 import time
+from multiprocessing import Queue
+
+from PIL import Image
+from pynput.mouse import Button, Controller as MouseController
+from pynput.keyboard import Key, Controller as KeyboardController
 from datetime import datetime
 
 import cv2
@@ -11,16 +16,19 @@ import numpy as np
 import pyautogui
 import pytesseract
 
-hp_full = 1139
-mana_full = 617
+hp_full = 1426
+mana_full = 481
 
-ice_armor_key = "A"
-ice_spike_key = "X"
-blizzard_key = "D"
-tele_key = "C"
+shield_key = "S"
+holy_key = "D"
+foh_key = "C"
+conviction_key = "A"
+# tele_key = "C"
 
 hell = True
 counter = 0
+mouse = MouseController()
+keyboard = KeyboardController()
 
 difficult = cv2.cvtColor(cv2.imread('elements/difficult.PNG'), cv2.COLOR_BGR2GRAY)
 portal = cv2.cvtColor(cv2.imread('elements/portal.PNG'), cv2.COLOR_BGR2GRAY)
@@ -105,6 +113,8 @@ resurrect = cv2.cvtColor(cv2.imread('elements/resurrect.PNG'), cv2.COLOR_BGR2GRA
 merc = cv2.cvtColor(cv2.imread('elements/merc.PNG'), cv2.COLOR_BGR2GRAY)
 merc_archer = cv2.cvtColor(cv2.imread('elements/merc_archer.PNG'), cv2.COLOR_BGR2GRAY)
 merc_aura = cv2.cvtColor(cv2.imread('elements/merc_aura.PNG'), cv2.COLOR_BGR2GRAY)
+hp_check = cv2.cvtColor(cv2.imread('elements/hp_check.PNG'), cv2.COLOR_BGR2GRAY)
+hp_merc_check = cv2.cvtColor(cv2.imread('elements/merc_aura_danger.PNG'), cv2.COLOR_BGR2GRAY)
 screen_width, screen_height = pyautogui.size()
 
 
@@ -183,16 +193,31 @@ def start_game(template=nightmare):
     select_game()
     enter_game(template)
     pyautogui.sleep(1)
-    loc_x, loc_y = detect_template_bin(replay,
-                                       take_screenshot(*convert_resolution(560, 300), *convert_resolution(600, 600)))
-    while loc_x != 0 and loc_y != 0:
-        pyautogui.sleep(10)
-        mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(620, 325))])
-        pyautogui.sleep(wait_time)
-        enter_game(template)
-        pyautogui.sleep(wait_time)
-        loc_x, loc_y = detect_template_bin(replay, take_screenshot(*convert_resolution(560, 300),
-                                                                   *convert_resolution(600, 600)))
+    # loc_x, loc_y = detect_template_bin(replay,
+    #                                    take_screenshot(*convert_resolution(560, 300), *convert_resolution(600, 600)))
+
+    loc_x, loc_y, loc_x2, loc_y2 = 0, 0, 0, 0
+    while loc_x == 0 and loc_y == 0:
+        pyautogui.sleep(0.1)
+        loc_x, loc_y = detect_template_bin(difficult,
+                                           take_screenshot(*convert_resolution(1700, 0),
+                                                           *convert_resolution(220, 60)))
+        loc_x2, loc_y2 = detect_template_bin(replay, take_screenshot(*convert_resolution(560, 300),
+                                                                     *convert_resolution(600, 600)))
+        pyautogui.sleep(0.1)
+        if loc_x2 != 0 and loc_y2 != 0:
+            mimic_mouse_click(*[x + y for x, y in zip((loc_x2, loc_y2), convert_resolution(620, 325))])
+            pyautogui.sleep(wait_time)
+            enter_game(template)
+
+    # while loc_x != 0 and loc_y != 0:
+    #     pyautogui.sleep(10)
+    #     mimic_mouse_click(*[x + y for x, y in zip((loc_x, loc_y), convert_resolution(620, 325))])
+    #     pyautogui.sleep(wait_time)
+    #     enter_game(template)
+    #     pyautogui.sleep(wait_time)
+    #     loc_x, loc_y = detect_template_bin(replay, take_screenshot(*convert_resolution(560, 300),
+    #                                                                *convert_resolution(600, 600)))
 
 
 def select_game(wait_time=1):
@@ -303,13 +328,13 @@ def farm():
     screenshot = mf_screenshot() if found31 else screenshot
     boolean_array.append(found31)
 
-    # found10 = mf(mf_vampire, screenshot, color_format=cv2.COLOR_BGR2BGRA)
-    # screenshot = mf_screenshot() if found10 else screenshot
-    # boolean_array.append(found10)
+    found10 = mf(mf_vampire, screenshot, color_format=cv2.COLOR_BGR2BGRA)
+    screenshot = mf_screenshot() if found10 else screenshot
+    boolean_array.append(found10)
 
-    # found11 = mf(mf_glove, screenshot, color_format=cv2.COLOR_BGR2BGRA)
-    # screenshot = mf_screenshot() if found11 else screenshot
-    # boolean_array.append(found11)
+    found11 = mf(mf_glove, screenshot, color_format=cv2.COLOR_BGR2BGRA)
+    screenshot = mf_screenshot() if found11 else screenshot
+    boolean_array.append(found11)
 
     # found12 = mf(mf_belt, screenshot, color_format=cv2.COLOR_BGR2BGRA)
     # screenshot = mf_screenshot() if found12 else screenshot
@@ -323,25 +348,25 @@ def farm():
     screenshot = mf_screenshot() if found14 else screenshot
     boolean_array.append(found14)
 
-    # found15 = mf(mf_mitts_rare, screenshot, color_format=cv2.COLOR_BGR2BGRA)
-    # screenshot = mf_screenshot() if found15 else screenshot
-    # boolean_array.append(found15)
-    #
-    # found16 = mf(mf_gloves_rare, screenshot, color_format=cv2.COLOR_BGR2BGRA)
-    # screenshot = mf_screenshot() if found16 else screenshot
-    # boolean_array.append(found16)
-    #
-    # found17 = mf(mf_gauntlets_rare, screenshot, color_format=cv2.COLOR_BGR2BGRA)
-    # screenshot = mf_screenshot() if found17 else screenshot
-    # boolean_array.append(found17)
+    found15 = mf(mf_mitts_rare, screenshot, color_format=cv2.COLOR_BGR2BGRA)
+    screenshot = mf_screenshot() if found15 else screenshot
+    boolean_array.append(found15)
+
+    found16 = mf(mf_gloves_rare, screenshot, color_format=cv2.COLOR_BGR2BGRA)
+    screenshot = mf_screenshot() if found16 else screenshot
+    boolean_array.append(found16)
+
+    found17 = mf(mf_gauntlets_rare, screenshot, color_format=cv2.COLOR_BGR2BGRA)
+    screenshot = mf_screenshot() if found17 else screenshot
+    boolean_array.append(found17)
 
     found18 = mf(mf_orb_magic, screenshot, color_format=cv2.COLOR_BGR2BGRA)
     screenshot = mf_screenshot() if found18 else screenshot
     boolean_array.append(found18)
 
-    # found19 = mf(mf_javelin, screenshot)
-    # screenshot = mf_screenshot() if found19 else screenshot
-    # boolean_array.append(found19)
+    found19 = mf(mf_javelin, screenshot)
+    screenshot = mf_screenshot() if found19 else screenshot
+    boolean_array.append(found19)
 
     # found20 = mf(mf_vortex, screenshot)
     # screenshot = mf_screenshot() if found20 else screenshot
@@ -351,17 +376,17 @@ def farm():
     screenshot = mf_screenshot() if found21 else screenshot
     boolean_array.append(found21)
 
-    # found22 = mf(mf_shako, screenshot, color_format=cv2.COLOR_BGR2BGRA)
-    # screenshot = mf_screenshot() if found22 else screenshot
-    # boolean_array.append(found22)
+    found22 = mf(mf_shako, screenshot, color_format=cv2.COLOR_BGR2BGRA)
+    screenshot = mf_screenshot() if found22 else screenshot
+    boolean_array.append(found22)
 
     found23 = mf(mf_wand_unique, screenshot, color_format=cv2.COLOR_BGR2BGRA)
     screenshot = mf_screenshot() if found23 else screenshot
     boolean_array.append(found23)
 
-    # found25 = mf(mf_talrasha_armor, screenshot, color_format=cv2.COLOR_BGR2BGRA)
-    # screenshot = mf_screenshot() if found25 else screenshot
-    # boolean_array.append(found25)
+    found25 = mf(mf_talrasha_armor, screenshot, color_format=cv2.COLOR_BGR2BGRA)
+    screenshot = mf_screenshot() if found25 else screenshot
+    boolean_array.append(found25)
 
     found26 = mf(mf_coronet, screenshot, color_format=cv2.COLOR_BGR2BGRA)
     screenshot = mf_screenshot() if found26 else screenshot
@@ -460,17 +485,22 @@ def wait_to_load():
         loc_x, loc_y = detect_template_bin(difficult,
                                            take_screenshot(*convert_resolution(1700, 0), *convert_resolution(220, 60)))
         pyautogui.sleep(0.1)
+    pyautogui.sleep(0.1)
 
 
 def to_pindle(cd=0.3):
-    mimic_keyboard_press(tele_key, duration=0.2)
+    # mimic_keyboard_press(tele_key, duration=0.2)
+    # pyautogui.sleep(0.1)
+    # pyautogui.rightClick(*convert_resolution(1480, 100), duration=0.2)
+    # pyautogui.sleep(0.3 if cd < 0.3 else cd)
+    # pyautogui.rightClick(*convert_resolution(1480, 130), duration=0.2)
+    # pyautogui.sleep(0.3 if cd < 0.3 else cd)
+    # pyautogui.rightClick(*convert_resolution(1485, 105), duration=0.2)
+    # pyautogui.sleep(cd)
     pyautogui.sleep(0.1)
-    pyautogui.rightClick(*convert_resolution(1480, 100), duration=0.2)
-    pyautogui.sleep(0.3 if cd < 0.3 else cd)
-    pyautogui.rightClick(*convert_resolution(1480, 130), duration=0.2)
-    pyautogui.sleep(0.3 if cd < 0.3 else cd)
-    pyautogui.rightClick(*convert_resolution(1485, 105), duration=0.2)
-    pyautogui.sleep(cd)
+    mimic_mouse_hold(*convert_resolution(1000, 350), 2)
+    pyautogui.sleep(0.1)
+    mimic_mouse_hold(*convert_resolution(1500, 350), 1.6)
 
 
 def ice_gun(cd=0.3):
@@ -492,37 +522,111 @@ def in_temple():
     return loc_x != 0 and loc_y != 0
 
 
+def click(x, y, mouse_click=Button.left, duration=0.05):
+    # Move mouse to position
+    mouse.position = (x, y)
+    time.sleep(duration)
+
+    # Immediately perform a click
+    mouse.click(mouse_click)
+
+
 def fight():
     fight_rounds = 0
-    while fight_rounds < 2:
-        mimic_keyboard_press(ice_spike_key, duration=0.1)
+    while fight_rounds < 5:
+        mimic_keyboard_press(holy_key, duration=0.1)
+        # pyautogui.sleep(0.1)
+        click(*convert_resolution(1570, 250), mouse_click=Button.right, duration=0.2)
+        # print(fight_rounds * 5 + 1)
+        # pyautogui.sleep(0.1)
+        click(*convert_resolution(1590, 250), mouse_click=Button.right, duration=0.2)
+        # print(fight_rounds * 5 + 2)
+        # pyautogui.rightClick(*convert_resolution(1590, 250), duration=0.1)
+        # pyautogui.sleep(0.1)
+        click(*convert_resolution(1620, 250), mouse_click=Button.right, duration=0.2)
+        # print(fight_rounds * 5 + 3)
+        # pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
+        # pyautogui.sleep(0.1)
+        # click(*convert_resolution(1605, 250), mouse_click=Button.right, duration=0.2)
+        # # print(fight_rounds * 5 + 4)
+        # # pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
+        # # pyautogui.sleep(0.1)
+        # click(*convert_resolution(1605, 250), mouse_click=Button.right, duration=0.2)
+        # print(fight_rounds * 5 + 5)
+        # pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
+        # pyautogui.sleep(0.1)
+        # mimic_keyboard_press(foh_key, duration=0.1)
+        # pyautogui.sleep(0.1)
+        # pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.1)
+        # pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.1)
+        # pyautogui.sleep(0.4)
+        mimic_keyboard_press(conviction_key, duration=0.1)
         pyautogui.sleep(0.1)
-        pyautogui.rightClick(*convert_resolution(1590, 250), duration=0.1)
-        pyautogui.sleep(0.2)
-        pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
-        pyautogui.sleep(0.2)
-        pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
-        pyautogui.sleep(0.2)
-        pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
-        pyautogui.sleep(0.2)
-        mimic_keyboard_press(blizzard_key, duration=0.1)
-        pyautogui.sleep(0.1)
-        pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.1)
-        pyautogui.rightClick(*convert_resolution(1420, 230), duration=0.1)
-        pyautogui.sleep(0.4)
+        keyboard.press(Key.shift)
+        # # mouse.position = (screen_width / 2 + 250, screen_height / 2 - 200)
+        # mouse.position = (screen_width / 2 + 100, screen_height / 2 - 50)
+        # mouse.press(Button.left)
+        #
+        # # Hold both for 4 seconds
+        # # time.sleep(4)
+        # time.sleep(1)
+        #
+        # # Release both
+        # mouse.release(Button.left)
+        click(*convert_resolution(screen_width / 2 + 100, screen_height / 2 - 50), mouse_click=Button.left,
+              duration=0.1)
+        keyboard.release(Key.shift)
+        time.sleep(0.1)
         fight_rounds += 1
-    mimic_keyboard_press(ice_spike_key, duration=0.1)
-    pyautogui.sleep(0.1)
-    pyautogui.rightClick(*convert_resolution(1590, 250), duration=0.1)
-    pyautogui.sleep(0.2)
-    pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
-    pyautogui.sleep(0.2)
-    pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
+    # mimic_keyboard_press(holy_key, duration=0.1)
+    # pyautogui.sleep(0.1)
+    # pyautogui.rightClick(*convert_resolution(1590, 250), duration=0.1)
+    # pyautogui.sleep(0.2)
+    # pyautogui.rightClick(*convert_resolution(1620, 250), duration=0.1)
+    # pyautogui.sleep(0.2)
+    # pyautogui.rightClick(*convert_resolution(1605, 250), duration=0.1)
+    # mimic_keyboard_press(conviction_key, duration=0.1)
+    # pyautogui.sleep(0.1)
+
+    # foh_rounds = 0
+    # while foh_rounds < 5:
+    #     keyboard.press(Key.shift)
+    #     # # mouse.position = (screen_width / 2 + 250, screen_height / 2 - 200)
+    #     # mouse.position = (screen_width / 2 + 100, screen_height / 2 - 50)
+    #     # mouse.press(Button.left)
+    #     #
+    #     # # Hold both for 4 seconds
+    #     # # time.sleep(4)
+    #     # time.sleep(1)
+    #     #
+    #     # # Release both
+    #     # mouse.release(Button.left)
+    #     click(*convert_resolution(screen_width / 2 + 100, screen_height / 2 - 50), mouse_click=Button.left, duration=0.1)
+    #     keyboard.release(Key.shift)
+    #     time.sleep(0.2)
+    #     foh_rounds += 1
+    # print("done")
+
+    # pyautogui.keyDown('shift')
+    # # Press and hold right mouse button
+    # # pyautogui.mouseDown(*convert_resolution(screen_width / 2 + 300, screen_height / 2 - 300), button='right')
+    # pyautogui.mouseDown(*convert_resolution(screen_width / 2 + 300, screen_height / 2 - 300), button='left')
+    #
+    # # Hold for 4 seconds
+    # time.sleep(3)
+    #
+    # # Release the right mouse button
+    # # pyautogui.mouseUp(*convert_resolution(screen_width / 2 + 300, screen_height / 2 - 300), button='right')
+    # pyautogui.mouseUp(*convert_resolution(screen_width / 2 + 300, screen_height / 2 - 300), button='left')
+    # pyautogui.keyUp('shift')
+    # pyautogui.rightClick(*convert_resolution(1420, 230), duration=4)
 
     return False
 
 
 def leave():
+    pyautogui.keyUp('alt')
+    pyautogui.sleep(0.1)
     pyautogui.press('esc')
     pyautogui.sleep(0.1)
     mimic_mouse_click(*convert_resolution(880, 470), 0.1)
@@ -642,7 +746,7 @@ def find_stash():
         if loc_x != 0 and loc_y != 0:
             return 1280 + loc_x, 300 + loc_y
         stash_counter += 1
-    return 1500, 570
+    return 1580, 570
 
 
 def put_to_chest(count):
@@ -712,6 +816,8 @@ def heal_malah():
 
 
 def need_heal(threshold=0.8):
+    # return danger_may_need_heal()
+
     count = 0
     while count < 4:
         buffer = take_screenshot(*convert_resolution(430, 863), *convert_resolution(55, 30))
@@ -734,13 +840,54 @@ def need_heal(threshold=0.8):
     return False
 
 
-def need_mana(threshold=0.8):
+def danger_merc():
     count = 0
-    prev_mana = 0
     while count < 4:
-        buffer = take_screenshot(*convert_resolution(1430, 863), *convert_resolution(55, 30))
-        # Convert the image to grayscale
+        buffer = take_screenshot(*convert_resolution(0, 0), *convert_resolution(100, 100))
 
+        # # Rewind the buffer to the beginning before reading
+        # buffer.seek(0)
+        #
+        # # Load the image from the BytesIO buffer
+        # img = Image.open(buffer)
+        #
+        # # Save the image to disk
+        # img.save(f"screenshot_{count}.png")
+
+        loc_x, loc_y = detect_template_bin(hp_merc_check, buffer, threshold=0.9)
+        if loc_x != 0 and loc_y != 0:
+            return False
+        count += 1
+    return True
+
+
+def danger_may_need_heal():
+    count = 0
+    while count < 4:
+        buffer = take_screenshot(*convert_resolution(320, 800), *convert_resolution(360, 280))
+
+        # # Rewind the buffer to the beginning before reading
+        # buffer.seek(0)
+        #
+        # # Load the image from the BytesIO buffer
+        # img = Image.open(buffer)
+        #
+        # # Save the image to disk
+        # img.save(f"screenshot_{count}.png")
+
+        loc_x, loc_y = detect_template_bin(hp_check, buffer, threshold=0.9)
+        if loc_x != 0 and loc_y != 0:
+            return False
+        count += 1
+    return True
+
+
+def danger_need_heal(threshold=0.8):
+    count = 0
+    danger_count = 0
+    while count < 6:
+        buffer = take_screenshot(*convert_resolution(430, 863), *convert_resolution(55, 30))
+        # Convert the image to grayscale
         gray_image = cv2.cvtColor(cv2.imdecode(np.frombuffer(buffer.getvalue(), np.uint8), cv2.IMREAD_COLOR),
                                   cv2.COLOR_BGR2GRAY)
 
@@ -749,14 +896,45 @@ def need_mana(threshold=0.8):
         # Use Tesseract to perform OCR on the preprocessed image, specifying output as digits only
         custom_config = r'--oem 3 --psm 6 outputbase digits'
         try:
-            mana_left = int(pytesseract.image_to_string(gray_image, config=custom_config))
+            hp_left = int(pytesseract.image_to_string(gray_image, config=custom_config))
         except ValueError as e:
-            mana_left = 100
+            hp_left = 100
 
-        if mana_left / mana_full < threshold:
-            return True
+        if hp_left / hp_full < threshold:
+            danger_count += 1
+            # print(hp_left)
+            if danger_count >= 3:
+                return True
         count += 1
     return False
+
+
+def need_mana(threshold=0.8):
+    return False
+
+    # count = 0
+    # prev_mana = 0
+    # while count < 4:
+    #     buffer = take_screenshot(*convert_resolution(1430, 863), *convert_resolution(55, 30))
+    #     # Convert the image to grayscale
+    #
+    #     gray_image = cv2.cvtColor(cv2.imdecode(np.frombuffer(buffer.getvalue(), np.uint8), cv2.IMREAD_COLOR),
+    #                               cv2.COLOR_BGR2GRAY)
+    #
+    #     # Apply any necessary preprocessing steps (e.g., resizing, thresholding)
+    #
+    #     # Use Tesseract to perform OCR on the preprocessed image, specifying output as digits only
+    #     custom_config = r'--oem 3 --psm 6 outputbase digits'
+    #     try:
+    #         mana_left = int(pytesseract.image_to_string(gray_image, config=custom_config))
+    #     except ValueError as e:
+    #         mana_left = 100
+    #
+    #     if mana_left / mana_full < threshold:
+    #         print(mana_left)
+    #         return True
+    #     count += 1
+    # return False
 
 
 def heal_back(level=nightmare, wait=6):
@@ -769,7 +947,7 @@ def heal_back(level=nightmare, wait=6):
 
 
 def ice_armor():
-    mimic_keyboard_press(ice_armor_key, duration=0.1)
+    mimic_keyboard_press(shield_key, duration=0.1)
     pyautogui.sleep(0.1)
     pyautogui.rightClick(920, 500, duration=0.1)
     pyautogui.sleep(0.1)
@@ -815,7 +993,8 @@ def revive_merc():
 
 
 def merc_died():
-    loc_x, loc_y = detect_template_bin(merc, take_screenshot(*convert_resolution(0, 0), *convert_resolution(600, 600)),
+    loc_x, loc_y = detect_template_bin(merc_aura,
+                                       take_screenshot(*convert_resolution(0, 0), *convert_resolution(600, 600)),
                                        threshold=0.8)
     if loc_x == 0 and loc_y == 0:
         return True
@@ -829,6 +1008,11 @@ def merc_back(level, wait=6):
     pyautogui.sleep(wait)
     start_game(level)
     wait_to_load()
+
+
+def fight_farm(result_queue: Queue):
+    fight()
+    result_queue.put(farm())
 
 
 def start(update_time):
@@ -845,6 +1029,8 @@ def start(update_time):
         success_counter = 0
         found = False
         while True:
+            keyboard.release(Key.shift)
+            pyautogui.keyUp('alt')
             start_time_round = datetime.now()
             while found:
                 start_game(level)
@@ -867,8 +1053,31 @@ def start(update_time):
             wait_to_load()
             to_pindle(0.2)
             pyautogui.sleep(0.5)
-            fight()
-            found = farm()
+            # found = fight_farm()
+
+            result_queue = Queue()
+            fight_thread = multiprocessing.Process(target=fight_farm, args=(result_queue,))
+            fight_thread.start()
+            while True:
+                try:
+                    if not result_queue.empty():
+                        found = result_queue.get()
+                        break
+
+                    # if danger_need_heal(0.6):
+                    if danger_may_need_heal() or danger_merc():
+                        print("Low HP, leave...")
+                        fight_thread.terminate()
+                        keyboard.release(Key.shift)
+                        pyautogui.keyUp('alt')
+                        break
+
+                    time.sleep(0.2)  # Simulate periodic checking
+                except KeyboardInterrupt:
+                    print("\nCtrl+C detected! Stopping fight threads...")
+                    fight_thread.terminate()
+                    break
+
             if found:
                 found_counter += 1
             success_counter += 1
@@ -899,8 +1108,8 @@ def check_rounds():
                 time_since_update = time.time() - last_update_time.value
 
             # if time_since_update > 150:  # 2 minutes 30 seconds
-            if time_since_update > 300:
-                print("Value hasn't updated for 5 mins. Restarting game...")
+            if time_since_update > 600:
+                print("Value hasn't updated for 10 mins. Restarting game...")
                 # restart_event.set()  # Signal the updater thread to stop
                 time.sleep(5)  # Allow the updater thread to exit
                 updater_thread.terminate()
